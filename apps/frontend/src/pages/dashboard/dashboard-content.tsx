@@ -277,8 +277,8 @@ export function DashboardContent({
         </div>
 
         <div className="grow px-4 pb-[var(--mobile-nav-total-offset)] pt-14 md:px-6 md:pb-6 md:pt-12 lg:px-10 lg:pb-8 lg:pt-14">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-20">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(24rem,1fr)] lg:gap-20">
+            <div>
               <AccountsSummary
                 accountIds={accountIds}
                 dateRange={dateRange}
@@ -287,7 +287,7 @@ export function DashboardContent({
                 isLoadingCurrentValuations={isCurrentValuationLoading}
               />
             </div>
-            <div className="space-y-6 lg:col-span-1">
+            <div className="space-y-6">
               <TopHoldings
                 holdings={holdings}
                 isLoading={isHoldingsLoading}
