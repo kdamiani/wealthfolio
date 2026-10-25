@@ -216,13 +216,13 @@ the input.
 Completed implementation validation (including focused checks after review
 fixes):
 
-- Rust unit suites: core 2,009; Spending 181; SQLite 476; agent tools 148.
+- Rust unit suites: core 2,010; Spending 183; SQLite 476; agent tools 148.
 - SQLite category-reference/restart tests 7; two-device sync replay tests 15.
 - Server MCP/auth/native-service integration tests 35; desktop MCP/router tests
   12; MCP crate tests 15.
 - AI output parity 51 plus schema snapshots 20; the existing live Ollama test
   remains ignored because it requires Ollama and `WF_TEST_OLLAMA_MODEL`.
-- Frontend 496 tests across 56 affected feature/adapter/addon suites with four
+- Frontend 499 tests across 58 affected feature/adapter/addon suites with four
   workers; `pnpm check`; all 11 locales/20 namespaces; web and Tauri frontend
   builds. An unchanged MCP setup-card test failed in the initial unconstrained
   parallel run, then passed isolated and in the complete bounded-worker rerun.
