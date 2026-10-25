@@ -15,6 +15,9 @@ import { Label } from "@wealthfolio/ui/components/ui/label";
 import { toast } from "@wealthfolio/ui/components/ui/use-toast";
 import {
   applyScopeDependencies,
+  matchPreset,
+  presetLabel,
+  SCOPE_PRESETS,
   READ_SCOPES,
   scopeDescription,
   scopeLabel,
@@ -146,13 +149,19 @@ export function PatCreateDialog({
     const description = scopeDescription(t, scope.key);
     const lockedByMarketData =
       scope.key === "holdings:read" && selectedScopes.includes("market-data:write");
+    const lockedBySpending =
+      scope.key === "spending:read" &&
+      (selectedScopes.includes("spending:write") || selectedScopes.includes("budget:write"));
     const locked =
+      lockedBySpending ||
       lockedByMarketData ||
       (scope.key === "activities:draft" && selectedScopes.includes("activities:write")) ||
       (scope.key === "classification:suggest" && selectedScopes.includes("classification:write"));
-    const lockedTitle = lockedByMarketData
-      ? t("settings:agentAccess.scope_locked_market_data_title")
-      : t("settings:agentAccess.scope_locked_title");
+    const lockedTitle = lockedBySpending
+      ? t("settings:agentAccess.scope_locked_spending_title")
+      : lockedByMarketData
+        ? t("settings:agentAccess.scope_locked_market_data_title")
+        : t("settings:agentAccess.scope_locked_title");
     return (
       <button
         key={scope.key}
@@ -239,6 +248,26 @@ export function PatCreateDialog({
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
+                    {t("settings:agentAccess.dialog_presets")}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {SCOPE_PRESETS.map((preset) => (
+                      <Button
+                        key={preset.key}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        aria-pressed={matchPreset(selectedScopes)?.key === preset.key}
+                        onClick={() => setSelected(new Set(preset.scopes))}
+                      >
+                        {presetLabel(t, preset)}
+                      </Button>
+                    ))}
                   </div>
                 </div>
 

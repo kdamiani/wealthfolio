@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormattingProvider } from "@wealthfolio/ui";
 import { describe, expect, it, vi } from "vitest";
@@ -6,7 +6,20 @@ import type { TransactionRowVM } from "../lib/transactions-helpers";
 import { SplitTransactionSheet } from "./split-transaction-sheet";
 
 vi.mock("@/hooks/use-platform", () => ({ useIsMobileViewport: () => false }));
-vi.mock("./quick-categorize-popover", () => ({ QuickCategorizePopover: () => null }));
+vi.mock("./quick-categorize-popover", () => ({
+  QuickCategorizePopover: ({
+    trigger,
+    onSelect,
+  }: {
+    trigger: React.ReactNode;
+    onSelect: (taxonomy: string, category: string) => void;
+  }) => (
+    <div>
+      {trigger}
+      <button onClick={() => onSelect("spending_categories", "food")}>Choose groceries</button>
+    </div>
+  ),
+}));
 
 function splitRow(amount: string, currency: string, splitAmounts: string[]) {
   return {
@@ -31,7 +44,7 @@ function splitRow(amount: string, currency: string, splitAmounts: string[]) {
   } as unknown as TransactionRowVM;
 }
 
-function renderSheet(row: TransactionRowVM, locale = "DE") {
+function renderSheet(row: TransactionRowVM, locale = "DE", onReplace = vi.fn()) {
   const onSave = vi.fn().mockResolvedValue(undefined);
   render(
     <FormattingProvider locale={locale}>
@@ -43,6 +56,7 @@ function renderSheet(row: TransactionRowVM, locale = "DE") {
         onOpenChange={vi.fn()}
         onSave={onSave}
         onClear={vi.fn()}
+        onReplace={onReplace}
       />
     </FormattingProvider>,
   );
@@ -57,6 +71,29 @@ function savedAmounts(onSave: ReturnType<typeof vi.fn>) {
 }
 
 describe("SplitTransactionSheet", () => {
+  it("requires explicit confirmation and submits the exact reviewed split state", () => {
+    const row = splitRow("12.34", "USD", ["5", "7.34"]);
+    const onReplace = vi.fn().mockResolvedValue(undefined);
+    renderSheet(row, "en-US", onReplace);
+    const trigger = screen.getByRole("button", { name: "Replace splits with one category" });
+    fireEvent.click(
+      within(trigger.parentElement!).getByRole("button", { name: "Choose groceries" }),
+    );
+    expect(onReplace).not.toHaveBeenCalled();
+    const confirmation = screen.getByRole("alertdialog");
+    expect(confirmation).toHaveTextContent("Replace 2 split allocations with food?");
+    fireEvent.click(
+      within(confirmation).getByRole("button", { name: "Replace splits with one category" }),
+    );
+    expect(onReplace).toHaveBeenCalledExactlyOnceWith(
+      "activity-1",
+      "spending_categories",
+      "food",
+      row.activity.splits,
+    );
+    expect(onReplace.mock.calls[0][3]).not.toBe(row.activity.splits);
+  });
+
   it("formats the total and remaining amounts for the formatting region", () => {
     renderSheet(splitRow("1234.5", "EUR", ["1000"]));
 
