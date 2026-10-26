@@ -4,6 +4,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- `spending.searchCashActivities()` returns split amounts as exact decimal
+  strings, preserving replacement evidence without floating-point rounding.
+  Wealthfolio 3.11.0 returned numbers. The existing `string | number` SDK type
+  accepts both; JavaScript consumers must use explicit decimal arithmetic for
+  totals instead of adding raw values with `+`.
+- Activity updates sent through the addon bridge are projected onto the public
+  SDK fields (including the legacy `notes` alias). Native-only controls such as
+  `unlinkTransferPairId` are not forwarded by `update` or `saveMany`;
+  `activities.unlinkTransfer` retains its separate function grant.
+
 ## [3.11.0] - 2026-10-22
 
 ### Added
